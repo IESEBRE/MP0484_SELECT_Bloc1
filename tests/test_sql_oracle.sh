@@ -32,7 +32,7 @@ for query_file in "${files[@]}"; do
 
   docker exec oracle-db sqlplus "$ORACLE_USER/$ORACLE_PASS" <<EOF > /workspace/result_sql1.csv
 SET HEADING OFF FEEDBACK OFF PAGESIZE 0 VERIFY OFF ECHO OFF
-@/workspace/sql/${test_name}.sql
+@/workspace/sql/sql1.sql
 EXIT;
 EOF
 
