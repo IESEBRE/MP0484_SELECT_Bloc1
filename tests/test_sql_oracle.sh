@@ -4,14 +4,14 @@ set -e
 ORACLE_USER=system
 ORACLE_PASS=oracle
 ORACLE_SID=XE
-CONNECT_STRING="$ORACLE_USER/$ORACLE_PASS@localhost:1521/$ORACLE_SID as sysdba"
+CONNECT_STRING="$ORACLE_USER/$ORACLE_PASS@localhost:1521/$ORACLE_SID"
 
 echo "⏳ Waiting for Oracle to be ready..."
 sleep 60
 
 # Run setup
 echo "🧩 Running setup.sql"
-docker exec oracle-db sqlplus -s "$CONNECT_STRING" @/workspace/sql/setup.sql
+docker exec oracle-db sqlplus "$ORACLE_USER/$ORACLE_PASS" @/workspace/sql/setup.sql
 
 # Iterate over all query files
 for query_file in /workspace/sql/query*.sql; do
