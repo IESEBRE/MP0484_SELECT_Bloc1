@@ -1,0 +1,23 @@
+name: Test Oracle SQL
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Start Oracle XE container
+        run: |
+          docker run -d             --name oracle-db             -p 1521:1521             -e ORACLE_PWD=oracle             -v ${{ github.workspace }}:/workspace             gvenzl/oracle-xe:21-slim
+
+      - name: Install SQL*Plus client
+        run: sudo apt-get update && sudo apt-get install -y sqlplus
+
+      - name: Run SQL tests
+        run: bash tests/test_sql_oracle.sh
