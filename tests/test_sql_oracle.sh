@@ -14,12 +14,23 @@ echo "🧩 Running setup.sql"
 docker exec oracle-db sqlplus "$ORACLE_USER/$ORACLE_PASS" @/workspace/sql/setup.sql
 
 # Iterate over all query files
-for query_file in /workspace/sql/query*.sql; do
+sql_dir="/workspace/sql"
+
+# collect files into an array so we can test for emptiness
+files=( "$sql_dir"/query*.sql )
+
+if [ ${#files[@]} -eq 0 ]; then
+  echo "No query*.sql files found in $sql_dir" >&2
+  exit 1
+fi
+
+for query_file in "${files[@]}"; do
   test_name=$(basename "$query_file" .sql)
-  expected_file="/workspace/sql/expected_${test_name}.csv"
+  expected_file="$sql_dir/expected_${test_name}.csv"
+
   echo "🧪 Running ${test_name}.sql"
 
-  docker exec oracle-db sqlplus "$ORACLE_USER/$ORACLE_PASS" <<EOF > /workspace/result_${test_name}.csv
+  docker exec oracle-db sqlplus "$ORACLE_USER/$ORACLE_PASS" ${test_name}.sql > /workspace/result_${test_name}.csv
 SET HEADING OFF FEEDBACK OFF PAGESIZE 0 VERIFY OFF ECHO OFF
 @/workspace/sql/${test_name}.sql
 EXIT;
