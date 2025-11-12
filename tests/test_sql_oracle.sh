@@ -4,7 +4,7 @@ set -e
 ORACLE_USER=system
 ORACLE_PASS=oracle
 ORACLE_SID=XE
-CONNECT_STRING="$ORACLE_USER/$ORACLE_PASS@localhost:1521/$ORACLE_SID"
+CONNECT_STRING="$ORACLE_USER/$ORACLE_PASS@localhost:1521/$ORACLE_SID as sysdba"
 
 echo "⏳ Waiting for Oracle to be ready..."
 sleep 60
