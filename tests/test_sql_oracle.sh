@@ -26,23 +26,23 @@ fi
 
 for query_file in "${files[@]}"; do
   test_name=$(basename "$query_file" .sql)
-  expected_file="$sql_dir/expected_${test_name}.csv"
+  expected_file="$sql_dir/expected_sql1.csv"
 
   echo "🧪 Running ${test_name}.sql"
 
-  docker exec oracle-db sqlplus "$ORACLE_USER/$ORACLE_PASS" ${test_name}.sql > /workspace/result_${test_name}.csv
+  docker exec oracle-db sqlplus "$ORACLE_USER/$ORACLE_PASS" <<EOF > /workspace/result_sql1.csv
 SET HEADING OFF FEEDBACK OFF PAGESIZE 0 VERIFY OFF ECHO OFF
 @/workspace/sql/${test_name}.sql
 EXIT;
 EOF
 
-  sed -i 's/^[[:space:]]*//;s/[[:space:]]*$//' /workspace/result_${test_name}.csv
+  sed -i 's/^[[:space:]]*//;s/[[:space:]]*$//' /workspace/result_sql1.csv
 
-  if diff -q /workspace/result_${test_name}.csv "$expected_file" > /dev/null; then
+  if diff -q /workspace/result_sql1.csv expected_sql1.csv > /dev/null; then
     echo "✅ ${test_name} passed"
   else
     echo "❌ ${test_name} failed"
-    diff /workspace/result_${test_name}.csv "$expected_file" || true
+    diff /workspace/result_sql1.csv expected_sql1.csv || true
     exit 1
   fi
 done
