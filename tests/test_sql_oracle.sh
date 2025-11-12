@@ -19,7 +19,7 @@ for query_file in /workspace/sql/query*.sql; do
   expected_file="/workspace/sql/expected_${test_name}.csv"
   echo "🧪 Running ${test_name}.sql"
 
-  docker exec oracle-db sqlplus -s "$CONNECT_STRING" <<EOF > /workspace/result_${test_name}.csv
+  docker exec oracle-db sqlplus "$ORACLE_USER/$ORACLE_PASS" <<EOF > /workspace/result_${test_name}.csv
 SET HEADING OFF FEEDBACK OFF PAGESIZE 0 VERIFY OFF ECHO OFF
 @/workspace/sql/${test_name}.sql
 EXIT;
