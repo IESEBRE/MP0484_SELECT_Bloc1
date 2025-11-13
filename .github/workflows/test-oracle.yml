@@ -43,7 +43,10 @@ jobs:
       - name: Run setup SQL if exists
         run: |
           if [ -f ./sql/setup.sql ]; then
+            echo "File exists"
             docker exec oracle-db bash -lc "sqlplus system/oracle @./sql/setup.sql"
+          else
+            echo "File does not exist"
           fi
 
       # Step 6: Run and compare SQL queries
