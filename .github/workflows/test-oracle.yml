@@ -42,12 +42,13 @@ jobs:
       # Step 5: Initialize database schema (optional)
       - name: Run setup SQL if exists
         run: |
-          if [ -f /workspace/sql/setup.sql ]; then
+          if [ -f ./sql/setup.sql ]; then
             docker exec oracle-db bash -lc "sqlplus system/oracle @/workspace/sql/setup.sql"
           fi
 
-      # Step 6: Unified test step (solution vs student)
+      # Step 6: Run and compare SQL queries
       - name: Run and compare SQL queries (solutions vs student)
+        shell: bash
         run: |
           echo "🔍 Running and comparing all SQL queries..."
 
@@ -67,27 +68,28 @@ jobs:
 
             echo "▶️ Testing $name.sql"
 
-            # Run both queries in the same Oracle session
-            docker exec oracle-db bash -lc <<'EOF'
-                sqlplus system/oracle <<'EOF_SQL'
-                SET HEADING OFF
-                SET FEEDBACK OFF
-                SET PAGESIZE 0
-                SET VERIFY OFF
-                SET ECHO OFF
-                ALTER SESSION SET NLS_SORT = 'BINARY';
-                ALTER SESSION SET NLS_COMP = 'BINARY';
-                SPOOL /tmp/${name}_expected.csv
-                @${sol_file}
-                SPOOL OFF
-                SPOOL /tmp/${name}_student.csv
-                @${stud_file}
-                SPOOL OFF
-                EXIT;
-                EOF_SQL
-              EOF
+            # Create temporary SQL script containing BOTH queries
+            cat > /workspace/run_${name}.sql <<EOF
+SET HEADING OFF
+SET FEEDBACK OFF
+SET PAGESIZE 0
+SET VERIFY OFF
+SET ECHO OFF
+ALTER SESSION SET NLS_SORT = 'BINARY';
+ALTER SESSION SET NLS_COMP = 'BINARY';
+SPOOL /tmp/${name}_expected.csv
+@$sol_file
+SPOOL OFF
+SPOOL /tmp/${name}_student.csv
+@$stud_file
+SPOOL OFF
+EXIT;
+EOF
 
-            # Copy results back to workspace
+            # Execute script inside Oracle
+            docker exec oracle-db bash -lc "sqlplus -s system/oracle @/workspace/run_${name}.sql"
+
+            # Copy results back
             docker cp oracle-db:/tmp/${name}_expected.csv ./results/
             docker cp oracle-db:/tmp/${name}_student.csv ./results/
 
@@ -96,7 +98,7 @@ jobs:
               echo "✅ $name: Passed"
               ((pass_count++))
             else
-              echo "❌ $name: Failed (results differ)"
+              echo "❌ $name: Failed"
               ((fail_count++))
             fi
 
@@ -110,7 +112,7 @@ jobs:
             exit 1
           fi
 
-      # Step 7: Upload test results as artifact
+      # Step 7: Upload results
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
