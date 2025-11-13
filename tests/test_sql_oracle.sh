@@ -15,7 +15,7 @@ echo "🧩 Running setup.sql"
 docker exec oracle-db sqlplus -s "${CONNECT_STRING}" @/workspace/sql/setup.sql
 
 # Per comptar les sentències fallades
-cont=0
+count=0
 
 # Iterate over all query files in the repo (host path)
 for query_file in sql/query*.sql; do
@@ -64,7 +64,7 @@ EOF
   if diff -q "${host_result}" "${expected_file}" >/dev/null; then
     echo "✅ ${test_name} passed"
   else
-    cont++
+    count=$((count + 1))
     echo "❌ ${test_name} failed"
     echo "---- Actual ----"
     sed -n '1,200p' "${host_result}" || true
@@ -77,7 +77,7 @@ done
 if [ "$cont" -eq 0 ]; then
     echo "🎉 All SQL tests passed."
 else
-    echo "❌ $cont SQL tests failed."
+    echo "❌ $count SQL tests failed."
 
 fi
 
