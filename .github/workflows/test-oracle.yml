@@ -70,7 +70,7 @@ jobs:
               EXIT;
               EOF"
             
-            docker cp oracle-db:/tmp/${name}_expected.csv /workspace/results/expected/
+            docker cp oracle-db:/tmp/${name}_expected.csv ./results/expected/
           done
 
       # 👇 Step 6: Generate student results
@@ -101,9 +101,9 @@ jobs:
           echo "Comparing student queries with expected results..."
           pass_count=0
           fail_count=0
-          for expected_file in /workspace/results/expected/*.csv; do
+          for expected_file in ./results/expected/*.csv; do
             name=$(basename "$expected_file" _expected.csv)
-            student_file="/workspace/results/student/${name}_student.csv"
+            student_file="./results/student/${name}_student.csv"
             if [ -f "$student_file" ]; then
               if diff -q "$expected_file" "$student_file" > /dev/null; then
                 echo "✅ $name: Passed"
