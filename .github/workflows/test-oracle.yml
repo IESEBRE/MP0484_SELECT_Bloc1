@@ -18,3 +18,119 @@ jobs:
 
       - name: Run SQL tests
         run: bash tests/test_sql_oracle.sh
+--------------------------------------
+name: Test Oracle SQL Queries
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test-sql:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout student repository
+        uses: actions/checkout@v4
+
+      # 👇 Step 1: Start Oracle XE container
+      - name: Start Oracle XE container
+        run: |
+          docker run --name oracle-db -d -p 1521:1521 -p 5500:5500 -e ORACLE_PASSWORD=oracle -v ${{ github.workspace }}:/workspace gvenzl/oracle-xe:21-slim
+
+      # 👇 Step 2: Wait for Oracle to start
+      - name: Wait for Oracle to be ready
+        run: |
+          echo "Waiting for Oracle XE to be ready..."
+          for i in {1..30}; do
+            if docker exec oracle-db bash -lc "echo 'SELECT 1 FROM dual;' | sqlplus system/oracle" | grep -q 1; then
+              echo "✅ Oracle is ready."
+              break
+            fi
+            sleep 5
+          done
+
+      # 👇 Step 3: Clone the private solutions repository
+      - name: Clone private solutions repository
+        run: |
+          git clone https://x-access-token:${{ secrets.SOLUTIONS_TOKEN }}@github.com/IESEBRE/MP0484_SOLUCIONS_SQL_2526.git /workspace/solutions
+        # Replace YOUR_GITHUB_USERNAME and repo name as needed
+
+      # 👇 Step 4: Initialize database schema
+      # (Optional – if you need a schema or data before running queries)
+      - name: Run setup SQL (if exists)
+        run: |
+          if [ -f /workspace/setup.sql ]; then
+            docker exec oracle-db bash -lc "sqlplus system/oracle @/workspace/sql/setup.sql"
+          fi
+
+      # 👇 Step 5: Generate expected results from the private repo
+      - name: Generate expected results
+        run: |
+          mkdir -p /workspace/results/expected
+          for sql_file in /workspace/solutions/SELECT/BLOC1/*.sql; do
+            name=$(basename "$sql_file" .sql)
+            echo "Generating expected result for $name ..."
+            docker exec oracle-db bash -lc "sqlplus system/oracle <<EOF
+SET HEADING OFF FEEDBACK OFF PAGESIZE 0 VERIFY OFF ECHO OFF
+SPOOL /tmp/${name}_expected.csv
+@$sql_file
+SPOOL OFF
+EXIT;
+EOF"
+            docker cp oracle-db:/tmp/${name}_expected.csv /workspace/results/expected/
+          done
+
+      # 👇 Step 6: Generate student results
+      - name: Generate student results
+        run: |
+          mkdir -p /workspace/results/student
+          for sql_file in /workspace/sql/*.sql; do
+            name=$(basename "$sql_file" .sql)
+            echo "Generating student result for $name ..."
+            docker exec oracle-db bash -lc "sqlplus system/oracle <<EOF
+SET HEADING OFF FEEDBACK OFF PAGESIZE 0 VERIFY OFF ECHO OFF
+SPOOL /tmp/${name}_student.csv
+@$sql_file
+SPOOL OFF
+EXIT;
+EOF"
+            docker cp oracle-db:/tmp/${name}_student.csv /workspace/results/student/
+          done
+
+      # 👇 Step 7: Compare results
+      - name: Compare expected vs student results
+        run: |
+          echo "Comparing student queries with expected results..."
+          pass_count=0
+          fail_count=0
+          for expected_file in /workspace/results/expected/*.csv; do
+            name=$(basename "$expected_file" _expected.csv)
+            student_file="/workspace/results/student/${name}_student.csv"
+            if [ -f "$student_file" ]; then
+              if diff -q "$expected_file" "$student_file" > /dev/null; then
+                echo "✅ $name: Passed"
+                ((pass_count++))
+              else
+                echo "❌ $name: Failed (results differ)"
+                ((fail_count++))
+              fi
+            else
+              echo "⚠️  $name: No student query found"
+              ((fail_count++))
+            fi
+          done
+          echo "---------------------------------------------"
+          echo "Total passed: $pass_count"
+          echo "Total failed: $fail_count"
+          if ((fail_count > 0)); then
+            exit 1
+          fi
+
+      # 👇 Step 8: Upload test results as artifact
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-test-results
+          path: /workspace/results
