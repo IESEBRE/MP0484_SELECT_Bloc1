@@ -26,6 +26,7 @@ jobs:
       - name: Wait for Oracle to be ready
         run: |
           echo "Waiting for Oracle XE to be ready..."
+          sleep 25
           for i in {1..30}; do
             if docker exec oracle-db bash -lc "echo 'SELECT 1 FROM dual;' | sqlplus -s system/oracle" | grep -q 1; then
               echo "✅ Oracle is ready."
