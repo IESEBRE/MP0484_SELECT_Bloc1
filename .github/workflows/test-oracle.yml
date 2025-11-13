@@ -67,7 +67,7 @@ jobs:
             echo "▶️  Testing $name.sql"
 
             # Run both queries in the SAME Oracle session
-           docker exec oracle-db bash -lc "sqlplus system/oracle <<'EOF'
+           docker exec oracle-db bash -lc "sqlplus system/oracle <<EOF
 SET HEADING OFF
 SET FEEDBACK OFF
 SET PAGESIZE 0
