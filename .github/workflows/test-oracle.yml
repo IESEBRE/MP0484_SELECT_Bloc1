@@ -70,21 +70,21 @@ jobs:
 
             # Create temporary SQL script containing BOTH queries
             cat > /workspace/run_${name}.sql <<EOF
-SET HEADING OFF
-SET FEEDBACK OFF
-SET PAGESIZE 0
-SET VERIFY OFF
-SET ECHO OFF
-ALTER SESSION SET NLS_SORT = 'BINARY';
-ALTER SESSION SET NLS_COMP = 'BINARY';
-SPOOL /tmp/${name}_expected.csv
-@$sol_file
-SPOOL OFF
-SPOOL /tmp/${name}_student.csv
-@$stud_file
-SPOOL OFF
-EXIT;
-EOF
+              SET HEADING OFF
+              SET FEEDBACK OFF
+              SET PAGESIZE 0
+              SET VERIFY OFF
+              SET ECHO OFF
+              ALTER SESSION SET NLS_SORT = 'BINARY';
+              ALTER SESSION SET NLS_COMP = 'BINARY';
+              SPOOL /tmp/${name}_expected.csv
+              @$sol_file
+              SPOOL OFF
+              SPOOL /tmp/${name}_student.csv
+              @$stud_file
+              SPOOL OFF
+              EXIT;
+              EOF
 
             # Execute script inside Oracle
             docker exec oracle-db bash -lc "sqlplus -s system/oracle @/workspace/run_${name}.sql"
