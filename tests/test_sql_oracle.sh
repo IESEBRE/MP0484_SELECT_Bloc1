@@ -11,38 +11,27 @@ sleep 60
 
 # Run setup
 echo "🧩 Running setup.sql"
-docker exec oracle-db sqlplus "$ORACLE_USER/$ORACLE_PASS" @/workspace/sql/setup.sql
+docker exec oracle-db sqlplus -s "$CONNECT_STRING" @/workspace/sql/setup.sql
 
 # Iterate over all query files
-sql_dir="/workspace/sql"
-
-# collect files into an array so we can test for emptiness
-files=( "$sql_dir"/query*.sql )
-
-if [ ${#files[@]} -eq 0 ]; then
-  echo "No query*.sql files found in $sql_dir" >&2
-  exit 1
-fi
-
-for query_file in "${files[@]}"; do
+for query_file in /workspace/sql/query*.sql; do
   test_name=$(basename "$query_file" .sql)
-  expected_file="$sql_dir/expected_sql1.csv"
-
+  expected_file="/workspace/sql/expected_${test_name}.csv"
   echo "🧪 Running ${test_name}.sql"
 
-  docker exec oracle-db sqlplus "$ORACLE_USER/$ORACLE_PASS" <<EOF > /workspace/result_sql1.csv
+  docker exec oracle-db sqlplus -s "$CONNECT_STRING" <<EOF > /workspace/result_${test_name}.csv
 SET HEADING OFF FEEDBACK OFF PAGESIZE 0 VERIFY OFF ECHO OFF
-@/workspace/sql/sql1.sql
+@/workspace/sql/${test_name}.sql
 EXIT;
 EOF
 
-  sed -i 's/^[[:space:]]*//;s/[[:space:]]*$//' /workspace/result_sql1.csv
+  sed -i 's/^[[:space:]]*//;s/[[:space:]]*$//' /workspace/result_${test_name}.csv
 
-  if diff -q /workspace/result_sql1.csv expected_sql1.csv > /dev/null; then
+  if diff -q /workspace/result_${test_name}.csv "$expected_file" > /dev/null; then
     echo "✅ ${test_name} passed"
   else
     echo "❌ ${test_name} failed"
-    diff /workspace/result_sql1.csv expected_sql1.csv || true
+    diff /workspace/result_${test_name}.csv "$expected_file" || true
     exit 1
   fi
 done

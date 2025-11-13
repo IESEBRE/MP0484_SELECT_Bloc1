@@ -14,6 +14,7 @@ jobs:
 
       - name: Start Oracle XE container
         run: |
-          docker run --name oracle-db -d -p 1521:1521 -p 5500:5500 -v ${{ github.workspace }}:/workspace -e ORACLE_PASSWORD=oracle gvenzl/oracle-xe
+          docker run -d             --name oracle-db             -p 1521:1521             -e ORACLE_PWD=oracle             -v ${{ github.workspace }}:/workspace             gvenzl/oracle-xe:21-slim
+
       - name: Run SQL tests
         run: bash tests/test_sql_oracle.sh
