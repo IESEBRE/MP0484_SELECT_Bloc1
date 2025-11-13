@@ -18,7 +18,7 @@ jobs:
 
       - name: Run SQL tests
         run: bash tests/test_sql_oracle.sh
---------------------------------------
+
 name: Test Oracle SQL Queries
 
 on:
