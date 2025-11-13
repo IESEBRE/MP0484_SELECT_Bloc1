@@ -67,7 +67,7 @@ jobs:
             echo "▶️  Testing $name.sql"
 
             # Run both queries in the SAME Oracle session
-           docker exec oracle-db bash -lc "sqlplus system/oracle <<EOF
+           docker exec oracle-db bash -lc "sqlplus system/oracle <<EOF_SQL
 SET HEADING OFF
 SET FEEDBACK OFF
 SET PAGESIZE 0
@@ -82,7 +82,8 @@ SPOOL /tmp/${name}_student.csv
 @$stud_file
 SPOOL OFF
 EXIT;
-EOF"
+EOF_SQL
+"
 
 
             # Copy both result files to workspace
