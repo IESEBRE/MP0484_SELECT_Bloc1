@@ -1,1 +1,1 @@
-SELECT COUNT(*) FROM employees WHERE department = 'HR';
+SELECT nom FROM emp;
