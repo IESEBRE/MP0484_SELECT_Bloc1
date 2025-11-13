@@ -76,8 +76,8 @@ jobs:
       # 👇 Step 6: Generate student results
       - name: Generate student results
         run: |
-          mkdir -p /workspace/results/student
-          for sql_file in /workspace/sql/*.sql; do
+          mkdir -p ./results/student
+          for sql_file in ./sql/*.sql; do
             name=$(basename "$sql_file" .sql)
             echo "Generating student result for $name ..."
             docker exec oracle-db bash -lc "sqlplus system/oracle <<EOF
@@ -92,7 +92,7 @@ jobs:
               EXIT;
               EOF"
 
-            docker cp oracle-db:/tmp/${name}_student.csv /workspace/results/student/
+            docker cp oracle-db:/tmp/${name}_student.csv ./results/student/
           done
 
       # 👇 Step 7: Compare results
