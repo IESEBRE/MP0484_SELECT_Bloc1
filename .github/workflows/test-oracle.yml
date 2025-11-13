@@ -8,8 +8,7 @@ on:
 jobs:
   test-sql:
     runs-on: ubuntu-latest
-    shell: bash
-
+    
     steps:
       # Step 1: Checkout student repository
       - name: Checkout student repository
