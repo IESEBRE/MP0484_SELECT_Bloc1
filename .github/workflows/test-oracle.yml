@@ -51,76 +51,65 @@ jobs:
             echo "File does not exist"
           fi
 
-      # Step 6: Run and compare SQL queries
-      - name: Run and compare SQL queries (solutions vs student)
-        shell: bash
+      # 👇 Step 6: Generate expected results from the private repo
+      - name: Generate expected results
         run: |
-          echo "🔍 Running and comparing all SQL queries..."
-
-          mkdir -p ./results
-          pass_count=0
-          fail_count=0
-
-          for sol_file in ./MP0484_SOLUCIONS_SQL_2526/SELECT/BLOC1/*.sql; do
-            name=$(basename "$sol_file" .sql)
-            stud_file="./sql/${name}.sql"
-
-            if [ ! -f "$stud_file" ]; then
-              echo "⚠️ Missing student query for $name"
-              ((fail_count++))
-              continue
-            fi
-
-            echo "▶️ Testing $name.sql"
-
-            # Create temporary SQL script containing BOTH queries
-            cat > /workspace/run_${name}.sql <<EOF
-              SET HEADING OFF
-              SET FEEDBACK OFF
-              SET PAGESIZE 0
-              SET VERIFY OFF
-              SET ECHO OFF
-              ALTER SESSION SET NLS_SORT = 'BINARY';
-              ALTER SESSION SET NLS_COMP = 'BINARY';
-              SPOOL /tmp/${name}_expected.csv
-              @$sol_file
-              SPOOL OFF
-              SPOOL /tmp/${name}_student.csv
-              @$stud_file
-              SPOOL OFF
-              EXIT;
-              EOF
-
-            # Execute script inside Oracle
-            docker exec oracle-db bash -lc "sqlplus -s system/oracle @/workspace/run_${name}.sql"
-
-            # Copy results back
-            docker cp oracle-db:/tmp/${name}_expected.csv ./results/
-            docker cp oracle-db:/tmp/${name}_student.csv ./results/
-
-            # Compare results ignoring row order
-            if diff -q <(sort ./results/${name}_expected.csv) <(sort ./results/${name}_student.csv) > /dev/null; then
-              echo "✅ $name: Passed"
-              ((pass_count++))
-            else
-              echo "❌ $name: Failed"
-              ((fail_count++))
-            fi
-
+          mkdir -p /workspace/results/expected
+          for sql_file in /workspace/MP0484_SOLUCIONS_SQL_2526/SELECT/BLOC1/*.sql; do
+            name=$(basename "$sql_file" .sql)
+            echo "Generating expected result for $name ..."
+            docker exec oracle-db bash -lc "sqlplus system/oracle <<EOF
+SET HEADING OFF FEEDBACK OFF PAGESIZE 0 VERIFY OFF ECHO OFF
+SPOOL /tmp/${name}_expected.csv
+@$sql_file
+SPOOL OFF
+EXIT;
+EOF"
+            docker cp oracle-db:/tmp/${name}_expected.csv /workspace/results/expected/
           done
 
+      # 👇 Step 6: Generate student results
+      - name: Generate student results
+        run: |
+          mkdir -p /workspace/results/student
+          for sql_file in /workspace/sql/*.sql; do
+            name=$(basename "$sql_file" .sql)
+            echo "Generating student result for $name ..."
+            docker exec oracle-db bash -lc "sqlplus system/oracle <<EOF
+SET HEADING OFF FEEDBACK OFF PAGESIZE 0 VERIFY OFF ECHO OFF
+SPOOL /tmp/${name}_student.csv
+@$sql_file
+SPOOL OFF
+EXIT;
+EOF"
+            docker cp oracle-db:/tmp/${name}_student.csv /workspace/results/student/
+          done
+
+      # 👇 Step 7: Compare results
+      - name: Compare expected vs student results
+        run: |
+          echo "Comparing student queries with expected results..."
+          pass_count=0
+          fail_count=0
+          for expected_file in /workspace/results/expected/*.csv; do
+            name=$(basename "$expected_file" _expected.csv)
+            student_file="/workspace/results/student/${name}_student.csv"
+            if [ -f "$student_file" ]; then
+              if diff -q "$expected_file" "$student_file" > /dev/null; then
+                echo "✅ $name: Passed"
+                ((pass_count++))
+              else
+                echo "❌ $name: Failed (results differ)"
+                ((fail_count++))
+              fi
+            else
+              echo "⚠️  $name: No student query found"
+              ((fail_count++))
+            fi
+          done
           echo "---------------------------------------------"
           echo "Total passed: $pass_count"
           echo "Total failed: $fail_count"
-
           if ((fail_count > 0)); then
             exit 1
           fi
-
-      # Step 7: Upload results
-      - name: Upload results
-        uses: actions/upload-artifact@v4
-        with:
-          name: sql-test-results
-          path: ./results
-
