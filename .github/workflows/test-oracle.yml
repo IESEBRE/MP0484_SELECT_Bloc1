@@ -59,12 +59,17 @@ jobs:
             name=$(basename "$sql_file" .sql)
             echo "Generating expected result for $name ..."
             docker exec oracle-db bash -lc "sqlplus system/oracle <<EOF
-SET HEADING OFF FEEDBACK OFF PAGESIZE 0 VERIFY OFF ECHO OFF
-SPOOL /tmp/${name}_expected.csv
-@$sql_file
-SPOOL OFF
-EXIT;
-EOF"
+              SET HEADING OFF 
+              SET FEEDBACK OFF 
+              SET PAGESIZE 0 
+              SET VERIFY OFF 
+              SET ECHO OFF
+              SPOOL /tmp/${name}_expected.csv
+              @$sql_file
+              SPOOL OFF
+              EXIT;
+              EOF"
+            
             docker cp oracle-db:/tmp/${name}_expected.csv /workspace/results/expected/
           done
 
