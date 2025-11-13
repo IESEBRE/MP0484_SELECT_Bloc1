@@ -6,12 +6,16 @@ ORACLE_PASS=oracle
 ORACLE_SID=XE
 CONNECT_STRING="${ORACLE_USER}/${ORACLE_PASS}@localhost:1521/${ORACLE_SID}"
 
+
 echo "⏳ Waiting for Oracle to be ready..."
 sleep 60
 
 # Run setup inside the container
 echo "🧩 Running setup.sql"
 docker exec oracle-db sqlplus -s "${CONNECT_STRING}" @/workspace/sql/setup.sql
+
+# Per comptar les sentències fallades
+cont=0
 
 # Iterate over all query files in the repo (host path)
 for query_file in sql/query*.sql; do
@@ -60,6 +64,7 @@ EOF
   if diff -q "${host_result}" "${expected_file}" >/dev/null; then
     echo "✅ ${test_name} passed"
   else
+    cont=cont+1
     echo "❌ ${test_name} failed"
     echo "---- Actual ----"
     sed -n '1,200p' "${host_result}" || true
@@ -69,5 +74,10 @@ EOF
   fi
 done
 
-echo "🎉 All SQL tests passed."
+if [ "$cont" -eq 0 ]; then
+    echo "🎉 All SQL tests passed."
+else
+    echo "❌ Some SQL tests failed."
+
+fi
 
