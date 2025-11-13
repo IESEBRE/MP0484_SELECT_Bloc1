@@ -64,7 +64,7 @@ EOF
   if diff -q "${host_result}" "${expected_file}" >/dev/null; then
     echo "✅ ${test_name} passed"
   else
-    cont=cont+1
+    cont++
     echo "❌ ${test_name} failed"
     echo "---- Actual ----"
     sed -n '1,200p' "${host_result}" || true
@@ -77,7 +77,7 @@ done
 if [ "$cont" -eq 0 ]; then
     echo "🎉 All SQL tests passed."
 else
-    echo "❌ Some SQL tests failed."
+    echo "❌ $cont SQL tests failed."
 
 fi
 
