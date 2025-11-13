@@ -45,8 +45,8 @@ jobs:
         run: |
           if [ -f ./sql/setup.sql ]; then
             echo "File exists"
-            docker cp ./sql/setup.sql oracle-db:/
-            docker exec oracle-db bash -lc "sqlplus -s system/oracle @setup.sql"
+            docker cp ./sql/setup.sql oracle-db:/home/oracle
+            docker exec oracle-db bash -lc "sqlplus -s system/oracle @/home/oracle/setup.sql"
           else
             echo "File does not exist"
           fi
