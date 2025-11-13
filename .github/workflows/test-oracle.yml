@@ -37,7 +37,7 @@ jobs:
       # Step 4: Clone private solutions repository
       - name: Clone private solutions repository
         run: |
-          git clone https://x-access-token:${{ secrets.SOLUTIONS_TOKEN }}@github.com/IESEBRE/MP0484_SOLUCIONS_SQL_2526.git /workspace
+          git clone https://x-access-token:${{ secrets.SOLUTIONS_TOKEN }}@github.com/IESEBRE/MP0484_SOLUCIONS_SQL_2526.git ./MP0484_SOLUCIONS_SQL_2526
 
       # Step 5: Initialize database schema (optional)
       - name: Run setup SQL if exists
