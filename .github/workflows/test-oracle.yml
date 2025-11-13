@@ -70,23 +70,23 @@ jobs:
 
             # Run both queries in the same Oracle session
             docker exec oracle-db bash -lc <<EOF
-sqlplus -s system/oracle <<'EOF_SQL'
-SET HEADING OFF
-SET FEEDBACK OFF
-SET PAGESIZE 0
-SET VERIFY OFF
-SET ECHO OFF
-ALTER SESSION SET NLS_SORT = 'BINARY';
-ALTER SESSION SET NLS_COMP = 'BINARY';
-SPOOL /tmp/${name}_expected.csv
-@${sol_file}
-SPOOL OFF
-SPOOL /tmp/${name}_student.csv
-@${stud_file}
-SPOOL OFF
-EXIT;
-EOF_SQL
-EOF
+              sqlplus -s system/oracle <<'EOF_SQL'
+              SET HEADING OFF
+              SET FEEDBACK OFF
+              SET PAGESIZE 0
+              SET VERIFY OFF
+              SET ECHO OFF
+              ALTER SESSION SET NLS_SORT = 'BINARY';
+              ALTER SESSION SET NLS_COMP = 'BINARY';
+              SPOOL /tmp/${name}_expected.csv
+              @${sol_file}
+              SPOOL OFF
+              SPOOL /tmp/${name}_student.csv
+              @${stud_file}
+              SPOOL OFF
+              EXIT;
+              EOF_SQL
+              EOF
 
             # Copy results back to workspace
             docker cp oracle-db:/tmp/${name}_expected.csv /workspace/results/
