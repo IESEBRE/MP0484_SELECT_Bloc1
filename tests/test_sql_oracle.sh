@@ -25,6 +25,7 @@ for query_file in sql/query*.sql; do
   test_name=$(basename "$query_file" .sql)   # e.g. query1
   expected_file="sql/expected_${test_name}.csv"
   container_result="/workspace/result_${test_name}.csv"
+  container_result="/tmp/result_${test_name}.csv"
   host_result="result_${test_name}.csv"
 
   echo "🧪 Running ${test_name}.sql"
