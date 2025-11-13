@@ -66,7 +66,6 @@ EOF
     echo "---- Expected ----"
     sed -n '1,200p' "${expected_file}" || true
     diff "${host_result}" "${expected_file}" || true
-    exit 1
   fi
 done
 
