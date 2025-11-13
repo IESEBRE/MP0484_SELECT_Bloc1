@@ -51,11 +51,11 @@ jobs:
         run: |
           echo "🔍 Running and comparing all SQL queries..."
 
-          mkdir -p /workspace/results
+          mkdir -p ./results
           pass_count=0
           fail_count=0
 
-          for sol_file in /workspace/solutions/SELECT/BLOC1/*.sql; do
+          for sol_file in ./MP0484_SOLUCIONS_SQL_2526/SELECT/BLOC1/*.sql; do
             name=$(basename "$sol_file" .sql)
             stud_file="/workspace/sql/${name}.sql"
 
@@ -88,11 +88,11 @@ jobs:
               EOF
 
             # Copy results back to workspace
-            docker cp oracle-db:/tmp/${name}_expected.csv /workspace/results/
-            docker cp oracle-db:/tmp/${name}_student.csv /workspace/results/
+            docker cp oracle-db:/tmp/${name}_expected.csv ./results/
+            docker cp oracle-db:/tmp/${name}_student.csv ./results/
 
             # Compare results ignoring row order
-            if diff -q <(sort /workspace/results/${name}_expected.csv) <(sort /workspace/results/${name}_student.csv) > /dev/null; then
+            if diff -q <(sort ./results/${name}_expected.csv) <(sort ./results/${name}_student.csv) > /dev/null; then
               echo "✅ $name: Passed"
               ((pass_count++))
             else
