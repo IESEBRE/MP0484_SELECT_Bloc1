@@ -69,7 +69,7 @@ jobs:
 
             # Run both queries in the same Oracle session
             docker exec oracle-db bash -lc <<EOF
-              sqlplus -s system/oracle <<'EOF_SQL'
+              sqlplus system/oracle <<'EOF_SQL'
               SET HEADING OFF
               SET FEEDBACK OFF
               SET PAGESIZE 0
