@@ -8,45 +8,47 @@ on:
 jobs:
   test-sql:
     runs-on: ubuntu-latest
+    shell: bash
 
     steps:
+      # Step 1: Checkout student repository
       - name: Checkout student repository
         uses: actions/checkout@v4
 
-      # 👇 Step 1: Start Oracle XE container
+      # Step 2: Start Oracle XE container
       - name: Start Oracle XE container
         run: |
-          docker run --name oracle-db -d -p 1521:1521 -p 5500:5500 -e ORACLE_PASSWORD=oracle -v ${{ github.workspace }}:/workspace gvenzl/oracle-xe:21-slim
+          docker run --name oracle-db -d -p 1521:1521 -p 5500:5500 \
+            -e ORACLE_PASSWORD=oracle \
+            -v ${{ github.workspace }}:/workspace \
+            gvenzl/oracle-xe:21-slim
 
-      # 👇 Step 2: Wait for Oracle to start
+      # Step 3: Wait for Oracle to be ready
       - name: Wait for Oracle to be ready
         run: |
           echo "Waiting for Oracle XE to be ready..."
           for i in {1..30}; do
-            if docker exec oracle-db bash -lc "echo 'SELECT 1 FROM dual;' | sqlplus system/oracle" | grep -q 1; then
+            if docker exec oracle-db bash -lc "echo 'SELECT 1 FROM dual;' | sqlplus -s system/oracle" | grep -q 1; then
               echo "✅ Oracle is ready."
               break
             fi
             sleep 5
           done
 
-      # 👇 Step 3: Clone the private solutions repository
+      # Step 4: Clone private solutions repository
       - name: Clone private solutions repository
         run: |
           git clone https://x-access-token:${{ secrets.SOLUTIONS_TOKEN }}@github.com/IESEBRE/MP0484_SOLUCIONS_SQL_2526.git /workspace/solutions
-        # Replace YOUR_GITHUB_USERNAME and repo name as needed
 
-      # 👇 Step 4: Initialize database schema
-      # (Optional – if you need a schema or data before running queries)
-      - name: Run setup SQL (if exists)
+      # Step 5: Initialize database schema (optional)
+      - name: Run setup SQL if exists
         run: |
           if [ -f /workspace/setup.sql ]; then
-            docker exec oracle-db bash -lc "sqlplus system/oracle @/workspace/sql/setup.sql"
+            docker exec oracle-db bash -lc "sqlplus system/oracle @/workspace/setup.sql"
           fi
 
-      # 👇 Unified Step: Run and compare queries directly
+      # Step 6: Unified test step (solution vs student)
       - name: Run and compare SQL queries (solutions vs student)
-        shell: bash
         run: |
           echo "🔍 Running and comparing all SQL queries..."
 
@@ -54,22 +56,21 @@ jobs:
           pass_count=0
           fail_count=0
 
-          # Loop through each solution query
           for sol_file in /workspace/solutions/SELECT/BLOC1/*.sql; do
             name=$(basename "$sol_file" .sql)
             stud_file="/workspace/sql/${name}.sql"
 
             if [ ! -f "$stud_file" ]; then
-              echo "⚠️  Missing student query for $name"
+              echo "⚠️ Missing student query for $name"
               ((fail_count++))
               continue
             fi
 
-            echo "▶️  Testing $name.sql"
+            echo "▶️ Testing $name.sql"
 
-            # Run both queries in the SAME Oracle session
+            # Run both queries in the same Oracle session
             docker exec oracle-db bash -lc <<EOF
-sqlplus system/oracle <<'EOF_SQL'
+sqlplus -s system/oracle <<'EOF_SQL'
 SET HEADING OFF
 SET FEEDBACK OFF
 SET PAGESIZE 0
@@ -87,11 +88,11 @@ EXIT;
 EOF_SQL
 EOF
 
-            # Copy both result files to workspace
+            # Copy results back to workspace
             docker cp oracle-db:/tmp/${name}_expected.csv /workspace/results/
             docker cp oracle-db:/tmp/${name}_student.csv /workspace/results/
 
-            # Compare both results (ignoring line order)
+            # Compare results ignoring row order
             if diff -q <(sort /workspace/results/${name}_expected.csv) <(sort /workspace/results/${name}_student.csv) > /dev/null; then
               echo "✅ $name: Passed"
               ((pass_count++))
@@ -105,13 +106,15 @@ EOF
           echo "---------------------------------------------"
           echo "Total passed: $pass_count"
           echo "Total failed: $fail_count"
+
           if ((fail_count > 0)); then
             exit 1
           fi
 
-      # 👇 Step 8: Upload test results as artifact
+      # Step 7: Upload test results as artifact
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
           name: sql-test-results
           path: /workspace/results
+
