@@ -74,7 +74,7 @@ EOF
   fi
 done
 
-if [ "$cont" -eq 0 ]; then
+if [ "$count" -eq 0 ]; then
     echo "🎉 All SQL tests passed."
 else
     echo "❌ $count SQL tests failed."
