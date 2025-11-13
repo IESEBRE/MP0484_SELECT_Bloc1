@@ -54,8 +54,8 @@ jobs:
       # 👇 Step 6: Generate expected results from the private repo
       - name: Generate expected results
         run: |
-          mkdir -p /workspace/results/expected
-          for sql_file in /workspace/MP0484_SOLUCIONS_SQL_2526/SELECT/BLOC1/*.sql; do
+          mkdir -p ./results/expected
+          for sql_file in ./MP0484_SOLUCIONS_SQL_2526/SELECT/BLOC1/*.sql; do
             name=$(basename "$sql_file" .sql)
             echo "Generating expected result for $name ..."
             docker exec oracle-db bash -lc "sqlplus system/oracle <<EOF
