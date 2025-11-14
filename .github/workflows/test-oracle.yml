@@ -107,19 +107,20 @@ jobs:
           pass_count=0
           fail_count=0
           for expected_file in /${{ github.workspace }}/results/expected/*.csv; do
+            echo "passo0" 
             name=$(basename "$expected_file" _expected.csv)
             student_file="/${{ github.workspace }}/results/student/${name}_student.csv"
             if [ -f "$student_file" ]; then
               
               # Compare the trimmed files
-              if diff -q <(sed '1d;$d' "$expected_file" | tr -d '\r' | sort) \
-           <(sed '1d;$d' "$student_file" | tr -d '\r' | sort) > /dev/null;  then   #          if diff -q "$expected_file" "$student_file" > /dev/null; then
+              if diff -q <(sed '1d;$d' "$expected_file" | tr -d '\r' | sort) <(sed '1d;$d' "$student_file" | tr -d '\r' | sort) > /dev/null;  then  
                 echo "✅ $name: Passed"
                 ((pass_count++))
               else
                 echo "❌ $name: Failed (results differ)"
                 ((fail_count++))
               fi
+              echo "passo1" 
             else
               echo "⚠️  $name: No student query found"
               ((fail_count++))
