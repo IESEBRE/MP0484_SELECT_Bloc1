@@ -54,8 +54,8 @@ jobs:
       # 👇 Step 6: Generate expected results from the private repo
       - name: Generate expected results
         run: |
-          mkdir -p /temp/results/expected
-          for sql_file in /temp/MP0484_SOLUCIONS_SQL_2526/SELECT/BLOC1/*.sql; do
+          mkdir -p ./results/expected
+          for sql_file in /tmp/MP0484_SOLUCIONS_SQL_2526/SELECT/BLOC1/*.sql; do
             name=$(basename "$sql_file" .sql)
             echo "Generating expected result for $name ..."
             docker exec oracle-db bash -lc "sqlplus system/oracle <<EOF
@@ -70,13 +70,13 @@ jobs:
               EXIT;
               EOF"
             
-            docker cp oracle-db:/tmp/${name}_expected.csv /temp/results/expected/
+            docker cp oracle-db:/tmp/${name}_expected.csv ./results/expected/
           done
 
       # 👇 Step 6: Generate student results
       - name: Generate student results
         run: |
-          mkdir -p /temp/results/student
+          mkdir -p ./results/student
           for sql_file in ./sql/*.sql; do
             name=$(basename "$sql_file" .sql)
             echo "Generating student result for $name ..."
@@ -92,7 +92,7 @@ jobs:
               EXIT;
               EOF"
 
-            docker cp oracle-db:/tmp/${name}_student.csv /temp/results/student/
+            docker cp oracle-db:/tmp/${name}_student.csv ./results/student/
           done
 
       # 👇 Step 7: Compare results
@@ -101,9 +101,9 @@ jobs:
           echo "Comparing student queries with expected results..."
           pass_count=0
           fail_count=0
-          for expected_file in /temp/results/expected/*.csv; do
+          for expected_file in ./results/expected/*.csv; do
             name=$(basename "$expected_file" _expected.csv)
-            student_file="/temp/results/student/${name}_student.csv"
+            student_file="./results/student/${name}_student.csv"
             if [ -f "$student_file" ]; then
               if diff -q "$expected_file" "$student_file" > /dev/null; then
                 echo "✅ $name: Passed"
