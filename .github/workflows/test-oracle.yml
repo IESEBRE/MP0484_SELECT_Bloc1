@@ -81,7 +81,7 @@ jobs:
       - name: Generate student results
         run: |
           mkdir -p /${{ github.workspace }}/results/student
-          pwd
+          docker cp /${{ github.workspace }}/sql oracle-db:/tmp
           for sql_file in /${{ github.workspace }}/sql/*.sql; do
             name=$(basename "$sql_file" .sql)
             echo "Generating student result for $name ..."
