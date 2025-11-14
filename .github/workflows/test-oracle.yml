@@ -40,6 +40,7 @@ jobs:
         run: |
           git clone https://x-access-token:${{ secrets.SOLUTIONS_TOKEN }}@github.com/IESEBRE/MP0484_SOLUCIONS_SQL_2526.git /tmp/MP0484_SOLUCIONS_SQL_2526
           echo "📁 Listing cloned files:"
+          docker cp /temp/MP0484_SOLUCIONS_SQL_2526 oracle-db:/tmp/
           #ls -R /tmp/MP0484_SOLUCIONS_SQL_2526
           docker exec oracle-db bash -lc "ls -R /tmp/MP0484_SOLUCIONS_SQL_2526"
 
