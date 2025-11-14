@@ -92,7 +92,7 @@ jobs:
               SET VERIFY OFF 
               SET ECHO OFF
               SPOOL /tmp/${name}_student.csv
-              @$sql_file
+              @/tmp/sql/$name
               SPOOL OFF
               EXIT;
               EOF"
