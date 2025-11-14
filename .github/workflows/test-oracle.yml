@@ -97,8 +97,7 @@ jobs:
             @/tmp/sql/$name
             SPOOL OFF
             EXIT;
-            EOF
-            "
+EOF"
 
             docker cp oracle-db:/tmp/${name}_student.csv /${{ github.workspace }}/results/student/
           done
