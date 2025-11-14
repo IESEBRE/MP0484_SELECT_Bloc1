@@ -112,8 +112,13 @@ jobs:
             student_file="/${{ github.workspace }}/results/student/${name}_student.csv"
             if [ -f "$student_file" ]; then
               
-              # Compare the trimmed files
-              if diff -q <(sed '1d;$d' "$expected_file" | tr -d '\r' | sort) <(sed '1d;$d' "$student_file" | tr -d '\r' | sort) > /dev/null;  then  
+              expected_trimmed="/tmp/${name}_expected_trimmed.csv"
+              student_trimmed="/tmp/${name}_student_trimmed.csv"
+
+              sed '1d;$d' "$expected_file" | tr -d '\r' | sort > "$expected_trimmed"
+              sed '1d;$d' "$student_file"   | tr -d '\r' | sort > "$student_trimmed"
+
+              if diff -q "$expected_trimmed" "$student_trimmed" > /dev/null; then
                 echo "✅ $name: Passed"
                 echo "passo2"
                 ((pass_count++))
