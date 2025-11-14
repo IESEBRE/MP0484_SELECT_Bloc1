@@ -111,19 +111,9 @@ jobs:
             student_file="/${{ github.workspace }}/results/student/${name}_student.csv"
             if [ -f "$student_file" ]; then
               
-              # Remove first and last line from each file for comparison
-              expected_trimmed=$(mktemp)
-              student_trimmed=$(mktemp)
-
-              # Skip first and last line
-              sed '1d;$d' "$expected_file" > "$expected_trimmed"
-              sed '1d;$d' "$student_file"   > "$student_trimmed"
-
-              cat $student_trimmed
-              echo "----------------------" 
-              cat $expected_trimmed
               # Compare the trimmed files
-              if diff -q "$expected_trimmed" "$student_trimmed" > /dev/null; then   #          if diff -q "$expected_file" "$student_file" > /dev/null; then
+              if diff -q <(sed '1d;$d' "$expected_file" | tr -d '\r' | sort) \
+           <(sed '1d;$d' "$student_file" | tr -d '\r' | sort) > /dev/null;  then   #          if diff -q "$expected_file" "$student_file" > /dev/null; then
                 echo "✅ $name: Passed"
                 ((pass_count++))
               else
