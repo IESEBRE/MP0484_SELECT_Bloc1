@@ -47,7 +47,7 @@ jobs:
       # Step 5: Initialize database schema (optional)
       - name: Run setup SQL if exists
         run: |
-          if [ -f ./sql/setup.sql ]; then
+          if [ -f /workspace/sql/setup.sql ]; then
             echo "File exists"
             docker cp ./sql/setup.sql oracle-db:/tmp
             docker exec oracle-db bash -lc "sqlplus -s system/oracle @/tmp/setup.sql"
