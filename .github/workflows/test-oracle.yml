@@ -90,10 +90,10 @@ jobs:
             SET FEEDBACK OFF 
             SET PAGESIZE 0 
             SET VERIFY OFF 
-            SET ECHO OFF
             SPOOL /tmp/${name}_student.csv
             ALTER SESSION SET NLS_SORT = 'BINARY';
             ALTER SESSION SET NLS_COMP = 'BINARY';
+            SET ECHO OFF
             @/tmp/sql/$name
             SPOOL OFF
             EXIT;
