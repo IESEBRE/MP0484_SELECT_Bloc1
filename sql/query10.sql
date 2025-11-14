@@ -1,1 +1,1 @@
-SELECT DISTINCT situacio FROM dept;
+SELECT * FROM dual;

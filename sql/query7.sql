@@ -1,1 +1,1 @@
-SELECT num_dept, nom FROM dept;
+SELECT * FROM dual;

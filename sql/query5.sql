@@ -1,1 +1,1 @@
-SELECT salari/comissio FROM emp;
+SELECT * FROM dual;

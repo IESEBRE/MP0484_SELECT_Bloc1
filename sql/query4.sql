@@ -1,1 +1,1 @@
-SELECT 'Sóc un empleat' FROM emp;
+SELECT * FROM dual;

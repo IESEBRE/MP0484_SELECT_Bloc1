@@ -1,1 +1,1 @@
-SELECT 'Ho he aconseguit!!' FROM dual;
+SELECT * FROM dual;
