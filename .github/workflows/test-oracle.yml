@@ -86,18 +86,19 @@ jobs:
             name=$(basename "$sql_file" .sql)
             echo "Generating student result for $name ..."
             docker exec oracle-db bash -lc "sqlplus system/oracle <<EOF
-SET HEADING OFF 
-SET FEEDBACK OFF 
-SET PAGESIZE 0 
-SET VERIFY OFF 
-SET ECHO OFF
-SPOOL /tmp/${name}_student.csv
-ALTER SESSION SET NLS_SORT = 'BINARY';
-ALTER SESSION SET NLS_COMP = 'BINARY';
-@/tmp/sql/$name
-SPOOL OFF
-EXIT;
-EOF"
+            SET ECHO OFF
+            SET HEADING OFF 
+            SET FEEDBACK OFF 
+            SET PAGESIZE 0 
+            SET VERIFY OFF 
+            SPOOL /tmp/${name}_student.csv
+            ALTER SESSION SET NLS_SORT = 'BINARY';
+            ALTER SESSION SET NLS_COMP = 'BINARY';
+            @/tmp/sql/$name
+            SPOOL OFF
+            EXIT;
+            EOF
+            "
 
             docker cp oracle-db:/tmp/${name}_student.csv /${{ github.workspace }}/results/student/
           done
