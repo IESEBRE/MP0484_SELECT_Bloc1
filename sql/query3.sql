@@ -1,3 +1,1 @@
-SELECT * 
-FROM dual
-WHERE 1=1;
+SELECT nom, 'és un empleat' FROM emp;

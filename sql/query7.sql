@@ -1,3 +1,1 @@
-SELECT * 
-FROM dual
-WHERE 1=1;
+SELECT num_dept, nom FROM dept;
