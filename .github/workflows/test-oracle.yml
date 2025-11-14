@@ -96,8 +96,7 @@ jobs:
             ALTER SESSION SET NLS_COMP = 'BINARY';
             @/tmp/sql/$name
             SPOOL OFF
-            EXIT;
-EOF"
+            EXIT;EOF"
 
             docker cp oracle-db:/tmp/${name}_student.csv /${{ github.workspace }}/results/student/
           done
