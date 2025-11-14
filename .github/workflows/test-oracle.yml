@@ -49,7 +49,7 @@ jobs:
         run: |
           if [ -f /${{ github.workspace }}/sql/setup/setup.sql ]; then
             echo "File exists"
-            docker cp /${{ github.workspace }}/sql/setup/setup.sql oracle-db:/tmp/setup
+            docker cp /${{ github.workspace }}/sql/setup/setup.sql oracle-db:/tmp/setup/setup.sql
             docker exec oracle-db bash -lc "sqlplus -s system/oracle @/tmp/setup/setup.sql"
           else
             echo "File does not exist"
