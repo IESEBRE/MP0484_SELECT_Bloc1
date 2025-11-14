@@ -1,1 +1,1 @@
-SELECT nom FROM emp;
+SELECT num_dept FROM emp;
