@@ -115,7 +115,9 @@ jobs:
               # Compare the trimmed files
               if diff -q <(sed '1d;$d' "$expected_file" | tr -d '\r' | sort) <(sed '1d;$d' "$student_file" | tr -d '\r' | sort) > /dev/null;  then  
                 echo "✅ $name: Passed"
+                echo "passo2"
                 ((pass_count++))
+                echo "passo3"
               else
                 echo "❌ $name: Failed (results differ)"
                 ((fail_count++))
