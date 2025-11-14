@@ -1,1 +1,3 @@
-SELECT nom FROM emp;
+SELECT * 
+FROM dual
+WHERE 1=1;

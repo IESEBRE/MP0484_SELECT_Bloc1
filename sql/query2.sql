@@ -1,1 +1,3 @@
-SELECT num_dept FROM emp;
+SELECT * 
+FROM dual
+WHERE 1=1;
