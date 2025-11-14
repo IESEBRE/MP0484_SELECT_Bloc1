@@ -121,7 +121,7 @@ jobs:
               if diff -q "$expected_trimmed" "$student_trimmed" > /dev/null; then
                 echo "✅ $name: Passed"
                 echo "passo2"
-                ((pass_count++))
+                let "pass_count+=1"
                 echo "passo3"
               else
                 echo "❌ $name: Failed (results differ)"
